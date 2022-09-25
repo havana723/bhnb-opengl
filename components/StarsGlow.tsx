@@ -43,7 +43,7 @@ const StarsGlow = () => {
     for (let i = 0; i < count; i++) {
       temp[i * 3] = +database[i].x;
       temp[i * 3 + 1] = +database[i].y;
-      temp[i * 3 + 1] = +database[i].z;
+      temp[i * 3 + 2] = +database[i].z;
     }
     return temp;
   }, []);
@@ -51,7 +51,7 @@ const StarsGlow = () => {
   const sizes: Float32Array = useMemo(() => {
     const temp = new Float32Array(count);
     for (let i = 0; i < count; i++) {
-      temp[i] = Math.min(6.0, (-11 / 9) * +database[i].mag + 21 / 3 + 5) * 20;
+      temp[i] = Math.min(6.0, (-11 / 9) * +database[i].mag + 21 / 3 + 5) * 10;
     }
     return temp;
   }, []);
