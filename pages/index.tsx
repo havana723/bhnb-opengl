@@ -1,13 +1,16 @@
 import { css, Global } from "@emotion/react";
-import styled from "@emotion/styled";
+import { Canvas } from "@react-three/fiber";
 import type { NextPage } from "next";
+import { Suspense } from "react";
+import Stars from "../components/Stars";
 
-const PageContainer = styled.div`
-  position: relative;
-  height: 100%;
-  width: 100%;
-  background: black;
-`;
+const Scene = () => {
+  return (
+    <>
+      <Stars />
+    </>
+  );
+};
 
 const Home: NextPage = () => {
   return (
@@ -22,7 +25,11 @@ const Home: NextPage = () => {
           }
         `}
       />
-      <PageContainer></PageContainer>
+      <Canvas style={{ background: "black" }}>
+        <Suspense fallback={null}>
+          <Scene />
+        </Suspense>
+      </Canvas>
     </>
   );
 };
