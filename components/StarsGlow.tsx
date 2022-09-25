@@ -25,15 +25,17 @@ const vertexShader = `
 const fragmentShader = `
   uniform vec3 color;
 
+  float l;
+
   varying vec3 vColor;
 
   void main() {
-    if ( length( gl_PointCoord - vec2( 0.5, 0.5 ) ) > 0.475 ) discard;
-    gl_FragColor = vec4( color * vColor, 1.0 );
+    l = abs(0.5 - length(gl_PointCoord - vec2( 0.5, 0.5 )));
+    gl_FragColor = vec4( color * vColor, l * l );
   }
 `;
 
-const Stars = () => {
+const StarsGlow = () => {
   const starsRef = useRef<three.Points | null>(null);
 
   const positions: Float32Array = useMemo(() => {
@@ -49,7 +51,7 @@ const Stars = () => {
   const sizes: Float32Array = useMemo(() => {
     const temp = new Float32Array(count);
     for (let i = 0; i < count; i++) {
-      temp[i] = Math.min(6.0, (-11 / 9) * +database[i].mag + 21 / 3 + 5);
+      temp[i] = Math.min(6.0, (-11 / 9) * +database[i].mag + 21 / 3 + 5) * 20;
     }
     return temp;
   }, []);
@@ -58,9 +60,9 @@ const Stars = () => {
     const temp = new Float32Array(count * 3);
     for (let i = 0; i < count; i++) {
       const { r, g, b } = colorConverter(+database[i].ci);
-      temp[i * 3] = r * 5;
-      temp[i * 3 + 1] = g * 5;
-      temp[i * 3 + 2] = b * 5;
+      temp[i * 3] = r * 2;
+      temp[i * 3 + 1] = g * 2;
+      temp[i * 3 + 2] = b * 2;
     }
     return temp;
   }, []);
@@ -98,4 +100,4 @@ const Stars = () => {
   );
 };
 
-export default Stars;
+export default StarsGlow;

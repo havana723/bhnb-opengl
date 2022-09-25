@@ -1,25 +1,25 @@
 import { css, Global } from "@emotion/react";
-import { Effects } from "@react-three/drei";
 import { Canvas, extend, Object3DNode } from "@react-three/fiber";
 import type { NextPage } from "next";
 import { Suspense } from "react";
-import { UnrealBloomPass } from "three-stdlib";
+import { EffectComposer, RenderPass, UnrealBloomPass } from "three-stdlib";
 import Stars from "../components/Stars";
+import StarsGlow from "../components/StarsGlow";
 
 declare module "@react-three/fiber" {
   interface ThreeElements {
     unrealBloomPass: Object3DNode<UnrealBloomPass, typeof UnrealBloomPass>;
+    effectComposer: Object3DNode<EffectComposer, typeof EffectComposer>;
+    renderPass: Object3DNode<RenderPass, typeof RenderPass>;
   }
 }
 
-extend({ UnrealBloomPass });
+extend({ EffectComposer, RenderPass, UnrealBloomPass });
 
 const Scene = () => {
   return (
     <>
-      <Effects disableGamma>
-        <unrealBloomPass threshold={1} strength={5} radius={1} />
-      </Effects>
+      <StarsGlow />
       <Stars />
     </>
   );
@@ -38,7 +38,8 @@ const Home: NextPage = () => {
           }
         `}
       />
-      <Canvas style={{ background: "black" }}>
+      <Canvas>
+        <color attach="background" args={["#000000"]} />
         <Suspense fallback={null}>
           <Scene />
         </Suspense>
