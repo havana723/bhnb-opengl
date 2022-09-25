@@ -1,5 +1,9 @@
 export interface StarAttr {
-  x: number;
-  y: number;
-  z: number;
+  proper: string;
+  x: string;
+  y: string;
+  z: string;
+  mag: string;
+  id: string;
+  ci: string;
 }

@@ -1,12 +1,25 @@
 import { css, Global } from "@emotion/react";
-import { Canvas } from "@react-three/fiber";
+import { Effects } from "@react-three/drei";
+import { Canvas, extend, Object3DNode } from "@react-three/fiber";
 import type { NextPage } from "next";
 import { Suspense } from "react";
+import { UnrealBloomPass } from "three-stdlib";
 import Stars from "../components/Stars";
+
+declare module "@react-three/fiber" {
+  interface ThreeElements {
+    unrealBloomPass: Object3DNode<UnrealBloomPass, typeof UnrealBloomPass>;
+  }
+}
+
+extend({ UnrealBloomPass });
 
 const Scene = () => {
   return (
     <>
+      <Effects disableGamma>
+        <unrealBloomPass threshold={1} strength={5} radius={1} />
+      </Effects>
       <Stars />
     </>
   );

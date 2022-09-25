@@ -16,7 +16,7 @@ rows = list(rows)
 payload = list()
 
 #Get index of each column
-indexes = [proper, x, y, z, mag, lum, ci] = [rows[0].index(attr) for attr in ["proper", "x", "y", "z", "mag", "lum", "ci"]]
+indexes = [proper, x, y, z, mag, id, ci] = [rows[0].index(attr) for attr in ["proper", "x", "y", "z", "mag", "id", "ci"]]
 
 for row in rows[1:]:
     if float(row[mag]) <= mag_min:

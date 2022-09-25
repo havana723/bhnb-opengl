@@ -1,37 +1,54 @@
 import { useEffect, useMemo, useRef } from "react";
 import * as three from "three";
+import rawDatabase from "../scripts/reduced.json";
+import { StarAttr } from "../types/Star";
+
+const database = rawDatabase as unknown as StarAttr[];
+
+const count = database.length;
+
+const vertexShader = `
+  attribute float size;
+  attribute vec3 color;
+
+  varying vec3 vColor;
+
+	void main() {
+    vColor = color;
+    vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
+	  gl_PointSize = size;
+	  gl_Position = projectionMatrix * mvPosition;
+  }
+`;
+
+const fragmentShader = `
+  uniform vec3 color;
+
+  varying vec3 vColor;
+
+  void main() {
+    if ( length( gl_PointCoord - vec2( 0.5, 0.5 ) ) > 0.475 ) discard;
+    gl_FragColor = vec4( color * vColor, 1.0 );
+  }
+`;
 
 const Star = () => {
-  const count = 10000;
   const starsRef = useRef<three.Points | null>(null);
-
-  let material = new three.ShaderMaterial({
-    transparent: true,
-    uniforms: {
-      size: { value: 10 },
-      scale: { value: 1 },
-      color: { value: new three.Color("white") },
-    },
-    vertexShader: three.ShaderLib.points.vertexShader,
-    fragmentShader: `
-    uniform vec3 color;
-    void main() {
-        vec2 xy = gl_PointCoord.xy - vec2(0.5);
-        float ll = length(xy);
-        gl_FragColor = vec4(color, step(ll, 0.5));
-    }
-    `,
-  });
 
   const positions: Float32Array = useMemo(() => {
     const temp = new Float32Array(count * 3);
-    for (let i = 0; i < count * 3; i += 3) {
-      const x = Math.floor(Math.random() * 100) - 50;
-      const y = Math.floor(Math.random() * 100) - 50;
-      const z = Math.floor(Math.random() * 100) - 50;
-      temp[i] = x;
-      temp[i + 1] = y;
-      temp[i + 2] = z;
+    for (let i = 0; i < count; i++) {
+      temp[i * 3] = +database[i].x;
+      temp[i * 3 + 1] = +database[i].y;
+      temp[i * 3 + 1] = +database[i].z;
+    }
+    return temp;
+  }, []);
+
+  const sizes: Float32Array = useMemo(() => {
+    const temp = new Float32Array(count);
+    for (let i = 0; i < count; i++) {
+      temp[i] = Math.min(6.0, (-11 / 9) * +database[i].mag + 21 / 3 + 5);
     }
     return temp;
   }, []);
@@ -46,7 +63,7 @@ const Star = () => {
     return temp;
   }, []);
 
-  const generateStars = useEffect(() => {
+  useEffect(() => {
     if (starsRef.current) {
       starsRef.current.geometry.setAttribute(
         "position",
@@ -56,19 +73,22 @@ const Star = () => {
         "color",
         new three.BufferAttribute(colors, 3)
       );
+      starsRef.current.geometry.setAttribute(
+        "size",
+        new three.BufferAttribute(sizes, 1)
+      );
     }
-  }, [starsRef, positions, colors]);
+  }, [starsRef, positions, colors, sizes]);
 
   return (
     <>
       <points ref={starsRef}>
         <bufferGeometry />
-        <pointsMaterial
-          size={0.1}
-          sizeAttenuation={true}
-          depthWrite={true}
-          vertexColors={true}
-          blending={three.AdditiveBlending}
+        <shaderMaterial
+          attach="material"
+          uniforms={{ color: { value: new three.Color(0xffffff) } }}
+          vertexShader={vertexShader}
+          fragmentShader={fragmentShader}
         />
       </points>
     </>
