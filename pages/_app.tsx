@@ -17,7 +17,10 @@ function MyApp({ Component, pageProps }: AppProps) {
         <meta name="description" content="별 헤는 밤" />
         <meta property="og:title" content="BHNB" />
         <meta property="og:type" content="website" />
-        <meta property="og:image" content="" />
+        <meta
+          property="og:image"
+          content="https://bhnb.havana.moe/img/example.png"
+        />
         <meta property="og:site_name" content="BHNB" />
         <meta property="og:locale" content="ko_KR" />
         <meta property="og:image:width" content="1200" />
@@ -25,7 +28,10 @@ function MyApp({ Component, pageProps }: AppProps) {
         <meta name="twitter:card" content="photo" />
         <meta name="twitter:title" content="BHNB" />
         <meta name="twitter:description" content="별 헤는 밤" />
-        <meta name="twitter:image" content="" />
+        <meta
+          name="twitter:image"
+          content="https://bhnb.havana.moe/img/example.png"
+        />
       </Head>
       <Global
         styles={css`
