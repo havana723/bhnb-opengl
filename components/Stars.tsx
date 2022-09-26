@@ -1,13 +1,7 @@
 import { useEffect, useMemo, useRef } from "react";
 import * as three from "three";
-// @ts-ignore
-import rawDatabase from "../scripts/reduced.json";
 import { StarAttr } from "../types/Star";
 import colorConverter from "../utils/colorConverter";
-
-const database = rawDatabase as unknown as StarAttr[];
-
-const count = database.length;
 
 const vertexShader = `
   attribute float size;
@@ -34,8 +28,15 @@ const fragmentShader = `
   }
 `;
 
-const Stars = () => {
+interface Props {
+  database: StarAttr[];
+}
+
+const Stars: React.FC<Props> = (props) => {
   const starsRef = useRef<three.Points | null>(null);
+
+  const { database } = props;
+  const count = database.length;
 
   const positions: Float32Array = useMemo(() => {
     const temp = new Float32Array(count * 3);
@@ -45,7 +46,7 @@ const Stars = () => {
       temp[i * 3 + 2] = +database[i].z;
     }
     return temp;
-  }, []);
+  }, [count, database]);
 
   const sizes: Float32Array = useMemo(() => {
     const temp = new Float32Array(count);
@@ -53,7 +54,7 @@ const Stars = () => {
       temp[i] = Math.min(7.0, (-10 / 9) * +database[i].mag + 7) * 1.2;
     }
     return temp;
-  }, []);
+  }, [count, database]);
 
   const colors: Float32Array = useMemo(() => {
     const temp = new Float32Array(count * 3);
@@ -64,7 +65,7 @@ const Stars = () => {
       temp[i * 3 + 2] = b * 5;
     }
     return temp;
-  }, []);
+  }, [count, database]);
 
   useEffect(() => {
     if (starsRef.current) {
