@@ -13,6 +13,19 @@ function MyApp({ Component, pageProps }: AppProps) {
           crossOrigin="crossOrigin"
           href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.5/dist/web/static/pretendard-dynamic-subset.css"
         />
+        <title>BHNB</title>
+        <meta name="description" content="별 헤는 밤" />
+        <meta property="og:title" content="BHNB" />
+        <meta property="og:type" content="website" />
+        <meta property="og:image" content="" />
+        <meta property="og:site_name" content="BHNB" />
+        <meta property="og:locale" content="ko_KR" />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <meta name="twitter:card" content="photo" />
+        <meta name="twitter:title" content="BHNB" />
+        <meta name="twitter:description" content="별 헤는 밤" />
+        <meta name="twitter:image" content="" />
       </Head>
       <Global
         styles={css`

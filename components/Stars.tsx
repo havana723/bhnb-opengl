@@ -49,7 +49,7 @@ const Stars = () => {
   const sizes: Float32Array = useMemo(() => {
     const temp = new Float32Array(count);
     for (let i = 0; i < count; i++) {
-      temp[i] = Math.min(7.0, (-8 / 9) * +database[i].mag + 7);
+      temp[i] = Math.min(7.0, (-10 / 9) * +database[i].mag + 7) * 1.2;
     }
     return temp;
   }, []);

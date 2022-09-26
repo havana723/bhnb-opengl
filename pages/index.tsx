@@ -41,14 +41,9 @@ const Home: NextPage = () => {
         `}
       />
       <Canvas dpr={[1, 2]}>
-        <TrackballControls
-          rotateSpeed={5}
-          minDistance={0}
-          maxDistance={0.01}
-          noPan
-        />
         <color attach="background" args={["#000"]} />
         <Suspense fallback={null}>
+          <TrackballControls rotateSpeed={5} maxDistance={1000} noPan />
           <Scene />
         </Suspense>
       </Canvas>
