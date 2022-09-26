@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef } from "react";
 import * as three from "three";
+// @ts-ignore
 import rawDatabase from "../scripts/reduced.json";
 import { StarAttr } from "../types/Star";
 import colorConverter from "../utils/colorConverter";
