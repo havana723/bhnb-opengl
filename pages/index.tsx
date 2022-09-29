@@ -39,16 +39,16 @@ const Scene: React.FC<Props> = (props) => {
       <Comet position={lines[0][0]} start={lines[0][1]} end={lines[0][2]} />;
       <Comet position={lines[1][0]} start={lines[1][1]} end={lines[1][2]} />;
       <Comet position={lines[2][0]} start={lines[2][1]} end={lines[2][2]} />;
-      {lines.map((l) => {
+      {lines.map((l, i) => {
         console.log(l);
-        <Comet position={l[0]} start={l[1]} end={l[2]} />;
+        return <Comet position={l[0]} start={l[1]} end={l[2]} key={i} />;
       })}
     </>
   );
 };
 
 const Home: NextPage<{ database: StarAttr[] }> = ({ database }) => {
-  const lineCount = 10;
+  const lineCount = 100;
 
   const lines = useMemo(() => {
     const temp = new Array(lineCount);
