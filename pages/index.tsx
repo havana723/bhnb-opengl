@@ -3,7 +3,7 @@ import { Effects, TrackballControls } from "@react-three/drei";
 import { Canvas, extend, Object3DNode } from "@react-three/fiber";
 import axios from "axios";
 import type { NextPage } from "next";
-import { Suspense, useMemo } from "react";
+import { Suspense } from "react";
 import { CopyShader, RenderPass, UnrealBloomPass } from "three-stdlib";
 import Comet from "../components/Comet";
 import Stars from "../components/Stars";
@@ -20,15 +20,11 @@ extend({ RenderPass, UnrealBloomPass });
 
 interface Props {
   database: StarAttr[];
-  lines: [
-    [number, number, number],
-    [number, number, number],
-    [number, number, number]
-  ][];
+  lineCount: number;
 }
 
 const Scene: React.FC<Props> = (props) => {
-  const { database, lines } = props;
+  const { database, lineCount } = props;
   return (
     <>
       <Effects disableGamma>
@@ -36,40 +32,15 @@ const Scene: React.FC<Props> = (props) => {
         <shaderPass args={[CopyShader]} />
       </Effects>
       <Stars database={database} />
-      <Comet position={lines[0][0]} start={lines[0][1]} end={lines[0][2]} />;
-      <Comet position={lines[1][0]} start={lines[1][1]} end={lines[1][2]} />;
-      <Comet position={lines[2][0]} start={lines[2][1]} end={lines[2][2]} />;
-      {lines.map((l, i) => {
-        console.log(l);
-        return <Comet position={l[0]} start={l[1]} end={l[2]} key={i} />;
+      {[...Array(lineCount)].map((x, i) => {
+        return <Comet key={i} />;
       })}
     </>
   );
 };
 
 const Home: NextPage<{ database: StarAttr[] }> = ({ database }) => {
-  const lineCount = 100;
-
-  const lines = useMemo(() => {
-    const temp = new Array(lineCount);
-    for (let i = 0; i < lineCount; i++) {
-      const x = (Math.random() * 100 + 50) * (Math.random() - 0.5) * 2;
-      const y = (Math.random() * 100 + 50) * (Math.random() - 0.5) * 2;
-      const z = (Math.random() * 100 + 50) * (Math.random() - 0.5) * 2;
-      const dx = -Math.random() * 10 + x;
-      const dy = -Math.random() * 10 + y;
-      const dz = -Math.random() * 10 + z;
-      const ddx = Math.random() * 10 + x;
-      const ddy = Math.random() * 10 + y;
-      const ddz = Math.random() * 10 + z;
-      temp[i] = [
-        [x, y, z],
-        [dx, dy, dz],
-        [ddx, ddy, ddz],
-      ];
-    }
-    return temp;
-  }, []);
+  const lineCount = 10;
 
   return (
     <>
@@ -92,7 +63,7 @@ const Home: NextPage<{ database: StarAttr[] }> = ({ database }) => {
             maxDistance={1000}
             noPan
           />
-          <Scene database={database} lines={lines} />
+          <Scene database={database} lineCount={lineCount} />
         </Suspense>
       </Canvas>
     </>

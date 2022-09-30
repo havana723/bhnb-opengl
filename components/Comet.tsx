@@ -17,24 +17,34 @@ declare global {
   }
 }
 
-interface Props {
-  position: [number, number, number];
-  start: [number, number, number];
-  end: [number, number, number];
-}
-
-const Comet: React.FC<Props> = (props) => {
+const Comet: React.FC = () => {
   const cometRef = useRef<Line | null>(null);
   const cometMaterialRef = useRef<LineDashedMaterial | null>(null);
   const cometGeomRef = useRef<BufferGeometry | null>(null);
 
-  const { position, start, end } = props;
+  const x = (Math.random() * 100 + 50) * (Math.random() - 0.5) * 2;
+  const y = (Math.random() * 100 + 50) * (Math.random() - 0.5) * 2;
+  const z = (Math.random() * 100 + 50) * (Math.random() - 0.5) * 2;
+  const dx = -Math.random() * 10 + x;
+  const dy = -Math.random() * 10 + y;
+  const dz = -Math.random() * 10 + z;
+  const ddx = Math.random() * 10 + x;
+  const ddy = Math.random() * 10 + y;
+  const ddz = Math.random() * 10 + z;
+
+  const position = [x, y, z];
+  const start = [dx, dy, dz];
+  const end = [ddx, ddy, ddz];
+
+  const offset = Math.random() * 5;
+  const cycle = 10;
+
   const startPoint = useMemo(() => {
     return new three.Vector3(start[0], start[1], start[2]);
-  }, [start]);
+  }, []);
   const endPoint = useMemo(() => {
     return new three.Vector3(end[0], end[1], end[2]);
-  }, [end]);
+  }, []);
 
   const onUpdate = useCallback(
     (self: three.BufferGeometry) => {
@@ -45,28 +55,29 @@ const Comet: React.FC<Props> = (props) => {
 
   useFrame(({ clock }) => {
     cometRef.current?.computeLineDistances();
-    const time = clock.getElapsedTime() % 5;
+    const time = (offset + clock.getElapsedTime()) % cycle;
 
-    if (cometMaterialRef.current) {
-      if (time < 0.25) cometMaterialRef.current.dashSize = time * 150;
-      if (time >= 0.25 && time < 0.5) {
-        if (cometGeomRef.current) {
-          console.log(startPoint);
-          cometGeomRef.current.setFromPoints([
-            startPoint.lerpVectors(
-              new three.Vector3(start[0], start[1], start[2]),
+    if (time > 0) {
+      if (cometMaterialRef.current) {
+        if (time < 0.25) cometMaterialRef.current.dashSize = time * 150;
+        if (time >= 0.25 && time < 0.5) {
+          if (cometGeomRef.current) {
+            cometGeomRef.current.setFromPoints([
+              startPoint.lerpVectors(
+                new three.Vector3(start[0], start[1], start[2]),
+                endPoint,
+                (time - 0.25) * 4
+              ),
               endPoint,
-              (time - 0.25) * 4
-            ),
-            endPoint,
-          ]);
+            ]);
+          }
         }
-      }
-      if (time > 0.5) {
-        cometMaterialRef.current.dashSize = 0;
-        if (cometGeomRef.current) {
-          startPoint.lerp(new three.Vector3(start[0], start[1], start[2]), 1);
-          cometGeomRef.current.setFromPoints([startPoint, endPoint]);
+        if (time > 0.5) {
+          cometMaterialRef.current.dashSize = 0;
+          if (cometGeomRef.current) {
+            startPoint.lerp(new three.Vector3(start[0], start[1], start[2]), 1);
+            cometGeomRef.current.setFromPoints([startPoint, endPoint]);
+          }
         }
       }
     }
