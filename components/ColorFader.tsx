@@ -8,6 +8,7 @@ const Blend = styled.div`
   width: 100%;
   z-index: 1000;
   pointer-events: none;
+  opacity: 50%;
 `;
 
 const Blend1 = styled(Blend)`
