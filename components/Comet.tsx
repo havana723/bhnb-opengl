@@ -1,5 +1,5 @@
 import { extend, ReactThreeFiber, useFrame } from "@react-three/fiber";
-import { useCallback, useMemo, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import * as three from "three";
 import { BufferGeometry, Line, LineDashedMaterial } from "three";
 
@@ -17,34 +17,52 @@ declare global {
   }
 }
 
+interface CometState {
+  position: [number, number, number];
+  start: three.Vector3;
+  end: three.Vector3;
+  offset: number;
+}
+
+const CYCLE = 10;
+const SCALE = 300;
+
 const Comet: React.FC = () => {
   const cometRef = useRef<Line | null>(null);
   const cometMaterialRef = useRef<LineDashedMaterial | null>(null);
   const cometGeomRef = useRef<BufferGeometry | null>(null);
 
-  const x = (Math.random() * 100 + 50) * (Math.random() - 0.5) * 2;
-  const y = (Math.random() * 100 + 50) * (Math.random() - 0.5) * 2;
-  const z = (Math.random() * 100 + 50) * (Math.random() - 0.5) * 2;
-  const dx = -Math.random() * 10 + x;
-  const dy = -Math.random() * 10 + y;
-  const dz = -Math.random() * 10 + z;
-  const ddx = Math.random() * 10 + x;
-  const ddy = Math.random() * 10 + y;
-  const ddz = Math.random() * 10 + z;
+  const [cometState, setCometState] = useState<CometState | null>(null);
 
-  const position = [x, y, z];
-  const start = [dx, dy, dz];
-  const end = [ddx, ddy, ddz];
+  const initialize = useCallback((elapsedTime?: number): CometState => {
+    const x = (Math.random() * SCALE + SCALE / 2) * (Math.random() - 0.5) * 2;
+    const y = (Math.random() * SCALE + SCALE / 2) * (Math.random() - 0.5) * 2;
+    const z = (Math.random() * SCALE + SCALE / 2) * (Math.random() - 0.5) * 2;
+    const dx = (-Math.random() * SCALE) / 10 + x;
+    const dy = (-Math.random() * SCALE) / 10 + y;
+    const dz = (-Math.random() * SCALE) / 10 + z;
+    const ddx = (Math.random() * SCALE) / 10 + x;
+    const ddy = (Math.random() * SCALE) / 10 + y;
+    const ddz = (Math.random() * SCALE) / 10 + z;
 
-  const offset = Math.random() * 5;
-  const cycle = 10;
+    return {
+      position: [x, y, z],
+      start: new three.Vector3(dx, dy, dz),
+      end: new three.Vector3(ddx, ddy, ddz),
+      offset: Math.random() * CYCLE + (elapsedTime || 0),
+    };
+  }, []);
+
+  useEffect(() => {
+    setCometState(initialize());
+  }, [initialize]);
 
   const startPoint = useMemo(() => {
-    return new three.Vector3(start[0], start[1], start[2]);
-  }, []);
+    return cometState?.start ?? new three.Vector3(0, 0, 0);
+  }, [cometState?.start]);
   const endPoint = useMemo(() => {
-    return new three.Vector3(end[0], end[1], end[2]);
-  }, []);
+    return cometState?.end ?? new three.Vector3(0, 0, 0);
+  }, [cometState?.end]);
 
   const onUpdate = useCallback(
     (self: three.BufferGeometry) => {
@@ -53,32 +71,36 @@ const Comet: React.FC = () => {
     [startPoint, endPoint]
   );
 
+  useEffect(() => {
+    cometGeomRef.current?.setFromPoints([startPoint, endPoint]);
+  }, [startPoint, endPoint]);
+
   useFrame(({ clock }) => {
     cometRef.current?.computeLineDistances();
-    const time = (offset + clock.getElapsedTime()) % cycle;
 
-    if (time > 0) {
-      if (cometMaterialRef.current) {
-        if (time < 0.25) cometMaterialRef.current.dashSize = time * 150;
-        if (time >= 0.25 && time < 0.5) {
-          if (cometGeomRef.current) {
-            cometGeomRef.current.setFromPoints([
-              startPoint.lerpVectors(
-                new three.Vector3(start[0], start[1], start[2]),
-                endPoint,
-                (time - 0.25) * 4
-              ),
+    if (!cometState) return;
+
+    const time = clock.getElapsedTime() - cometState.offset;
+
+    if (time > 0 && cometMaterialRef.current) {
+      if (time < 0.5) cometMaterialRef.current.dashSize = time * 70;
+      if (time >= 0.5 && time < 1.0) {
+        if (cometGeomRef.current) {
+          cometGeomRef.current.setFromPoints([
+            startPoint.lerpVectors(
+              cometState.start,
               endPoint,
-            ]);
-          }
+              (time - 0.5) * 2
+            ),
+            endPoint,
+          ]);
         }
-        if (time > 0.5) {
-          cometMaterialRef.current.dashSize = 0;
-          if (cometGeomRef.current) {
-            startPoint.lerp(new three.Vector3(start[0], start[1], start[2]), 1);
-            cometGeomRef.current.setFromPoints([startPoint, endPoint]);
-          }
-        }
+      }
+      if (time > 1.0) {
+        cometMaterialRef.current.dashSize = 0;
+      }
+      if (time > CYCLE) {
+        setCometState(initialize(clock.getElapsedTime()));
       }
     }
   });
@@ -94,7 +116,7 @@ const Comet: React.FC = () => {
           <bufferAttribute
             attach="attributes-position"
             count={1}
-            array={position}
+            array={cometState?.position}
             itemSize={3}
           />
         </bufferGeometry>

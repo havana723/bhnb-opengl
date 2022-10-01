@@ -1,9 +1,18 @@
 import { css, Global } from "@emotion/react";
-import { Effects, TrackballControls } from "@react-three/drei";
-import { Canvas, extend, Object3DNode } from "@react-three/fiber";
+import styled from "@emotion/styled";
+import {
+  Effects,
+  PerspectiveCamera,
+  TrackballControls,
+} from "@react-three/drei";
+import { TrackballControls as TrackballControlsImpl } from "three-stdlib";
+
+import { Canvas, extend, Object3DNode, useFrame } from "@react-three/fiber";
 import axios from "axios";
 import type { NextPage } from "next";
-import { Suspense } from "react";
+import { Suspense, useEffect, useRef } from "react";
+import * as three from "three";
+import { Vector3 } from "three";
 import { CopyShader, RenderPass, UnrealBloomPass } from "three-stdlib";
 import Comet from "../components/Comet";
 import Stars from "../components/Stars";
@@ -39,9 +48,90 @@ const Scene: React.FC<Props> = (props) => {
   );
 };
 
-const Home: NextPage<{ database: StarAttr[] }> = ({ database }) => {
-  const lineCount = 10;
+interface GalaxyProps {
+  database: StarAttr[];
+}
 
+const Galaxy: React.FC<GalaxyProps> = (props) => {
+  const lineCount = 50;
+  const ZOOMTIME = 5;
+
+  const controlRef = useRef<TrackballControlsImpl>(null);
+  const cameraRef = useRef<three.PerspectiveCamera>(null);
+
+  useEffect(() => {
+    if (cameraRef.current && controlRef.current) {
+      controlRef.current.enabled = false;
+      cameraRef.current.position.set(1000, 1000, 1000);
+      cameraRef.current.updateProjectionMatrix();
+      controlRef.current.enabled = true;
+      controlRef.current.update();
+    }
+  }, []);
+
+  useFrame(({ clock }) => {
+    const time = clock.getElapsedTime();
+
+    if (time < ZOOMTIME) {
+      if (cameraRef.current && controlRef.current) {
+        controlRef.current.enabled = false;
+        const newVector = cameraRef.current.position.lerp(
+          new Vector3(0, 0, 0),
+          time / ZOOMTIME
+        );
+        cameraRef.current.position.set(newVector.x, newVector.y, newVector.z);
+        cameraRef.current.updateProjectionMatrix();
+        controlRef.current.enabled = true;
+        controlRef.current.update();
+      }
+    }
+  });
+
+  return (
+    <>
+      <color attach="background" args={["#000"]} />
+      <Suspense fallback={null}>
+        <PerspectiveCamera ref={cameraRef} near={0.0001} makeDefault />
+        <TrackballControls
+          ref={controlRef}
+          camera={cameraRef.current ?? undefined}
+          rotateSpeed={5}
+          minDistance={0.1}
+          maxDistance={1000}
+          noPan
+        />
+        <Scene database={props.database} lineCount={lineCount} />
+      </Suspense>
+    </>
+  );
+};
+
+const Blend = styled.div`
+  position: fixed;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 100%;
+  z-index: 1000;
+  pointer-events: none;
+`;
+
+const Blend1 = styled(Blend)`
+  background-color: #1d31a520;
+  mix-blend-mode: screen;
+`;
+
+const Blend2 = styled(Blend)`
+  background: linear-gradient(to bottom, transparent 60%, #61c5ff22);
+  mix-blend-mode: screen;
+`;
+
+const Blend3 = styled(Blend)`
+  background: linear-gradient(to bottom, transparent 90%, #ffe0aa10);
+  mix-blend-mode: screen;
+`;
+
+const Home: NextPage<{ database: StarAttr[] }> = ({ database }) => {
   return (
     <>
       <Global
@@ -55,17 +145,11 @@ const Home: NextPage<{ database: StarAttr[] }> = ({ database }) => {
         `}
       />
       <Canvas dpr={[1, 2]}>
-        <color attach="background" args={["#000"]} />
-        <Suspense fallback={null}>
-          <TrackballControls
-            rotateSpeed={5}
-            minDistance={0.01}
-            maxDistance={1000}
-            noPan
-          />
-          <Scene database={database} lineCount={lineCount} />
-        </Suspense>
+        <Galaxy database={database} />
       </Canvas>
+      <Blend1 />
+      <Blend2 />
+      <Blend3 />
     </>
   );
 };
