@@ -10,9 +10,8 @@ import { TrackballControls as TrackballControlsImpl } from "three-stdlib";
 import { Canvas, extend, Object3DNode, useFrame } from "@react-three/fiber";
 import axios from "axios";
 import type { NextPage } from "next";
-import { Suspense, useEffect, useRef } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import * as three from "three";
-import { Vector3 } from "three";
 import { CopyShader, RenderPass, UnrealBloomPass } from "three-stdlib";
 import Comet from "../components/Comet";
 import Stars from "../components/Stars";
@@ -53,16 +52,23 @@ interface GalaxyProps {
 }
 
 const Galaxy: React.FC<GalaxyProps> = (props) => {
-  const lineCount = 50;
+  const lineCount = 10;
   const ZOOMTIME = 5;
 
   const controlRef = useRef<TrackballControlsImpl>(null);
   const cameraRef = useRef<three.PerspectiveCamera>(null);
 
+  const elapsedTime = useRef<number>(0);
+
+  const [zoomStartTime, setZoomStartTime] = useState<number>(0);
+  const [targetPosition, setTargetPosition] = useState<three.Vector3>(
+    new three.Vector3(0, 0, 0)
+  );
+
   useEffect(() => {
     if (cameraRef.current && controlRef.current) {
       controlRef.current.enabled = false;
-      cameraRef.current.position.set(1000, 1000, 1000);
+      cameraRef.current.position.set(500, 500, 500);
       cameraRef.current.updateProjectionMatrix();
       controlRef.current.enabled = true;
       controlRef.current.update();
@@ -70,13 +76,14 @@ const Galaxy: React.FC<GalaxyProps> = (props) => {
   }, []);
 
   useFrame(({ clock }) => {
-    const time = clock.getElapsedTime();
+    elapsedTime.current = clock.getElapsedTime();
+    const time = clock.getElapsedTime() - zoomStartTime;
 
     if (time < ZOOMTIME) {
       if (cameraRef.current && controlRef.current) {
         controlRef.current.enabled = false;
         const newVector = cameraRef.current.position.lerp(
-          new Vector3(0, 0, 0),
+          targetPosition,
           time / ZOOMTIME
         );
         cameraRef.current.position.set(newVector.x, newVector.y, newVector.z);
