@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef } from "react";
 import * as three from "three";
-import { StarAttr } from "../types/Star";
+import { useGalaxyContext } from "../contexts/GalaxyContext";
 import colorConverter from "../utils/colorConverter";
 
 const vertexShader = `
@@ -28,14 +28,11 @@ const fragmentShader = `
   }
 `;
 
-interface Props {
-  database: StarAttr[];
-}
-
-const Stars: React.FC<Props> = (props) => {
+const Stars: React.FC = () => {
   const starsRef = useRef<three.Points | null>(null);
 
-  const { database } = props;
+  const galaxyContext = useGalaxyContext();
+  const { database } = galaxyContext;
   const count = database.length;
 
   const positions: Float32Array = useMemo(() => {
