@@ -4,6 +4,7 @@ import axios from "axios";
 import type { NextPage } from "next";
 import ColorFader from "../components/ColorFader";
 import Galaxy from "../components/Galaxy";
+import StarMetaDisplay from "../components/StarMetaDisplay";
 import { GalaxyContextProvider } from "../contexts/GalaxyContext";
 import { StarAttr } from "../types/Star";
 
@@ -24,8 +25,9 @@ const Home: NextPage<{ database: StarAttr[] }> = ({ database }) => {
         <Canvas dpr={[1, 2]}>
           <Galaxy />
         </Canvas>
+        <ColorFader />
+        <StarMetaDisplay />
       </GalaxyContextProvider>
-      <ColorFader />
     </>
   );
 };
