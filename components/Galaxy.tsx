@@ -12,7 +12,6 @@ import {
   TrackballControls as TrackballControlsImpl,
   UnrealBloomPass,
 } from "three-stdlib";
-import { StarAttr } from "../types/Star";
 import Comet from "./Comet";
 import Stars from "./Stars";
 
@@ -25,20 +24,19 @@ declare module "@react-three/fiber" {
 
 extend({ RenderPass, UnrealBloomPass });
 
-interface Props {
-  database: StarAttr[];
+interface SceneProps {
   lineCount: number;
 }
 
-const Scene: React.FC<Props> = (props) => {
-  const { database, lineCount } = props;
+const Scene: React.FC<SceneProps> = (props) => {
+  const { lineCount } = props;
   return (
     <>
       <Effects disableGamma>
         <unrealBloomPass threshold={0.1} strength={5} radius={1} />
         <shaderPass args={[CopyShader]} />
       </Effects>
-      <Stars database={database} />
+      <Stars />
       {[...Array(lineCount)].map((x, i) => {
         return <Comet key={i} />;
       })}
@@ -46,11 +44,7 @@ const Scene: React.FC<Props> = (props) => {
   );
 };
 
-interface GalaxyProps {
-  database: StarAttr[];
-}
-
-const Galaxy: React.FC<GalaxyProps> = (props) => {
+const Galaxy: React.FC = () => {
   const lineCount = 10;
   const ZOOMTIME = 5;
 
@@ -106,7 +100,7 @@ const Galaxy: React.FC<GalaxyProps> = (props) => {
           maxDistance={1000}
           noPan
         />
-        <Scene database={props.database} lineCount={lineCount} />
+        <Scene lineCount={lineCount} />
       </Suspense>
     </>
   );
